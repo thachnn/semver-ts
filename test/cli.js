@@ -28,7 +28,7 @@ test('\ninc tests', (t) => {
   ;[
     [['-i', 'major', '1.0.0'], { out: '2.0.0', err: '', code: 0, signal: null }],
     [
-      ['-i', 'major', '1.0.0', '1.0.1'],
+      ['--inc=major', '-v', '1.0.0', '1.0.1'],
       {
         out: '',
         err: '--inc can only be used on a single version with no range',

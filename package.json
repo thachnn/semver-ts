@@ -4,11 +4,12 @@
   "description": "The semantic version parser for Node.js in TypeScript",
   "main": "lib/semver.js",
   "scripts": {
-    "build": "node node_modules/typescript/bin/tsc src/*.ts --target es5 --outDir lib",
+    "build": "node node_modules/typescript/bin/tsc src/bin.ts --outDir lib",
     "test": "node node_modules/tape/bin/tape test/**/*.js"
   },
   "devDependencies": {
     "@types/node": "^4.9.0",
+    "@types/tape": "^4.13.0",
     "tape": "^4.10.0",
     "typescript": "^3.4.0"
   },
@@ -19,9 +20,16 @@
   },
   "files": [
     "lib/",
+    "esm/",
     "src/",
     "*.bnf"
   ],
+  "types": "esm/semver.d.ts",
+  "module": "esm/semver.js",
+  "exports": {
+    "import": "./esm/semver.js",
+    "require": "./lib/semver.js"
+  },
   "prettier": {
     "printWidth": 85,
     "trailingComma": "none",
