@@ -1,10 +1,9 @@
-var tap = require('tap')
-var test = tap.test
-var semver = require('../semver.js')
+var test = require('tape')
+var minVersion = require('../').minVersion
 
 test('\nminimum version in range tests', function (t) {
   // [range, minimum, loose]
-  [
+  ;[
     // Stars
     ['*', '0.0.0'],
     ['* || >=2', '0.0.0'],
@@ -68,8 +67,8 @@ test('\nminimum version in range tests', function (t) {
     var range = tuple[0]
     var version = tuple[1]
     var loose = tuple[2] || false
-    var msg = 'minVersion(' + range + ', ' + loose + ') = ' + version
-    var min = semver.minVersion(range, loose)
+    var msg = `minVersion(${range}, ${loose}) = ${version}`
+    var min = minVersion(range, loose)
     t.ok(min === version || (min && min.version === version), msg)
   })
   t.end()

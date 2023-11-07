@@ -1,11 +1,9 @@
-var tap = require('tap')
-var test = tap.test
-var semver = require('../semver.js')
-var prerelease = semver.prerelease
+var test = require('tape')
+var prerelease = require('../').prerelease
 
 test('\nprerelease', function (t) {
   // [prereleaseParts, version, loose]
-  [
+  ;[
     [['alpha', 1], '1.2.2-alpha.1'],
     [[1], '0.6.1-1'],
     [['beta', 2], '1.0.0-beta.2'],

@@ -1,11 +1,10 @@
-var tap = require('tap')
-var test = tap.test
-var semver = require('../semver.js')
+var test = require('tape')
+var semver = require('../')
 
 test('\nmajor tests', function (t) {
   // [range, version]
   // Version should be detectable despite extra characters
-  [
+  ;[
     ['1.2.3', 1],
     [' 1.2.3 ', 1],
     [' 2.2.3-4 ', 2],
@@ -19,7 +18,7 @@ test('\nmajor tests', function (t) {
     var range = tuple[0]
     var version = tuple[1]
     var loose = tuple[2] || false
-    var msg = 'major(' + range + ') = ' + version
+    var msg = `major(${range}) = ${version}`
     t.equal(semver.major(range, loose), version, msg)
   })
   t.end()
@@ -28,7 +27,7 @@ test('\nmajor tests', function (t) {
 test('\nminor tests', function (t) {
   // [range, version]
   // Version should be detectable despite extra characters
-  [
+  ;[
     ['1.1.3', 1],
     [' 1.1.3 ', 1],
     [' 1.2.3-4 ', 2],
@@ -42,7 +41,7 @@ test('\nminor tests', function (t) {
     var range = tuple[0]
     var version = tuple[1]
     var loose = tuple[2] || false
-    var msg = 'minor(' + range + ') = ' + version
+    var msg = `minor(${range}) = ${version}`
     t.equal(semver.minor(range, loose), version, msg)
   })
   t.end()
@@ -51,7 +50,7 @@ test('\nminor tests', function (t) {
 test('\npatch tests', function (t) {
   // [range, version]
   // Version should be detectable despite extra characters
-  [
+  ;[
     ['1.2.1', 1],
     [' 1.2.1 ', 1],
     [' 1.2.2-4 ', 2],
@@ -65,7 +64,7 @@ test('\npatch tests', function (t) {
     var range = tuple[0]
     var version = tuple[1]
     var loose = tuple[2] || false
-    var msg = 'patch(' + range + ') = ' + version
+    var msg = `patch(${range}) = ${version}`
     t.equal(semver.patch(range, loose), version, msg)
   })
   t.end()

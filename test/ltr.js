@@ -1,12 +1,10 @@
-var tap = require('tap')
-var test = tap.test
-var semver = require('../semver.js')
-var ltr = semver.ltr
+var test = require('tape')
+var ltr = require('../').ltr
 
 test('\nltr tests', function (t) {
   // [range, version, loose]
   // Version should be less than range
-  [
+  ;[
     ['~1.2.2', '1.2.1'],
     ['~0.6.1-1', '0.6.1-0'],
     ['1.0.0 - 2.0.0', '0.0.1'],
@@ -76,7 +74,7 @@ test('\nltr tests', function (t) {
     var range = tuple[0]
     var version = tuple[1]
     var loose = tuple[2] || false
-    var msg = 'ltr(' + version + ', ' + range + ', ' + loose + ')'
+    var msg = `ltr(${version}, ${range}, ${loose})`
     t.ok(ltr(version, range, loose), msg)
   })
   t.end()
@@ -85,7 +83,7 @@ test('\nltr tests', function (t) {
 test('\nnegative ltr tests', function (t) {
   // [range, version, loose]
   // Version should NOT be less than range
-  [
+  ;[
     ['~ 1.0', '1.1.0'],
     ['~0.6.1-1', '0.6.1-1'],
     ['1.0.0 - 2.0.0', '1.2.3'],
@@ -174,7 +172,7 @@ test('\nnegative ltr tests', function (t) {
     var range = tuple[0]
     var version = tuple[1]
     var loose = tuple[2] || false
-    var msg = '!ltr(' + version + ', ' + range + ', ' + loose + ')'
+    var msg = `!ltr(${version}, ${range}, ${loose})`
     t.notOk(ltr(version, range, loose), msg)
   })
   t.end()

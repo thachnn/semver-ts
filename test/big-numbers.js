@@ -1,4 +1,4 @@
-var test = require('tap').test
+var test = require('tape')
 var semver = require('../')
 
 test('long version is too long', function (t) {

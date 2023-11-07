@@ -23,6 +23,7 @@
     "*.bnf"
   ],
   "prettier": {
+    "printWidth": 85,
     "trailingComma": "none",
     "semi": false,
     "singleQuote": true

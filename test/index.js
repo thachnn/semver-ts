@@ -1,8 +1,7 @@
 'use strict'
 
-var tap = require('tap')
-var test = tap.test
-var semver = require('../semver.js')
+var test = require('tape')
+var semver = require('../')
 var eq = semver.eq
 var gt = semver.gt
 var lt = semver.lt
@@ -18,11 +17,17 @@ var toComparators = semver.toComparators
 var SemVer = semver.SemVer
 var Range = semver.Range
 var Comparator = semver.Comparator
+var compareIdentifiers = semver.compareIdentifiers
+var rcompareIdentifiers = semver.rcompareIdentifiers
+var maxSatisfying = semver.maxSatisfying
+var minSatisfying = semver.minSatisfying
+var intersects = semver.intersects
 
 test('comparison tests', function (t) {
   // [version1, version2]
   // version1 should be greater than version2
-  [['0.0.0', '0.0.0-foo'],
+  ;[
+    ['0.0.0', '0.0.0-foo'],
     ['0.0.1', '0.0.0'],
     ['1.0.0', '0.9.9'],
     ['0.10.0', '0.9.0'],
@@ -59,8 +64,8 @@ test('comparison tests', function (t) {
     var loose = v[2]
     t.ok(gt(v0, v1, loose), "gt('" + v0 + "', '" + v1 + "')")
     t.ok(lt(v1, v0, loose), "lt('" + v1 + "', '" + v0 + "')")
-    t.ok(!gt(v1, v0, loose), "!gt('" + v1 + "', '" + v0 + "')")
-    t.ok(!lt(v0, v1, loose), "!lt('" + v0 + "', '" + v1 + "')")
+    t.notOk(gt(v1, v0, loose), "!gt('" + v1 + "', '" + v0 + "')")
+    t.notOk(lt(v0, v1, loose), "!lt('" + v0 + "', '" + v1 + "')")
     t.ok(eq(v0, v0, loose), "eq('" + v0 + "', '" + v0 + "')")
     t.ok(eq(v1, v1, loose), "eq('" + v1 + "', '" + v1 + "')")
     t.ok(neq(v0, v1, loose), "neq('" + v0 + "', '" + v1 + "')")
@@ -75,7 +80,8 @@ test('comparison tests', function (t) {
 test('equality tests', function (t) {
   // [version1, version2]
   // version1 should be equivalent to version2
-  [['1.2.3', 'v1.2.3', true],
+  ;[
+    ['1.2.3', 'v1.2.3', true],
     ['1.2.3', '=1.2.3', true],
     ['1.2.3', 'v 1.2.3', true],
     ['1.2.3', '= 1.2.3', true],
@@ -117,24 +123,27 @@ test('equality tests', function (t) {
     var v1 = v[1]
     var loose = v[2]
     t.ok(eq(v0, v1, loose), "eq('" + v0 + "', '" + v1 + "')")
-    t.ok(!neq(v0, v1, loose), "!neq('" + v0 + "', '" + v1 + "')")
+    t.notOk(neq(v0, v1, loose), "!neq('" + v0 + "', '" + v1 + "')")
     t.ok(cmp(v0, '==', v1, loose), 'cmp(' + v0 + '==' + v1 + ')')
-    t.ok(!cmp(v0, '!=', v1, loose), '!cmp(' + v0 + '!=' + v1 + ')')
-    t.ok(!cmp(v0, '===', v1, loose), '!cmp(' + v0 + '===' + v1 + ')')
+    t.notOk(cmp(v0, '!=', v1, loose), '!cmp(' + v0 + '!=' + v1 + ')')
+    t.notOk(cmp(v0, '===', v1, loose), '!cmp(' + v0 + '===' + v1 + ')')
 
     // also test with an object. they are === because obj.version matches
-    t.ok(cmp(new SemVer(v0, { loose: loose }), '===',
-      new SemVer(v1, { loose: loose })),
-      '!cmp(' + v0 + '===' + v1 + ') object')
+    t.ok(
+      cmp(new SemVer(v0, { loose: loose }), '===', new SemVer(v1, { loose: loose })),
+      '!cmp(' + v0 + '===' + v1 + ') object'
+    )
 
     t.ok(cmp(v0, '!==', v1, loose), 'cmp(' + v0 + '!==' + v1 + ')')
 
-    t.ok(!cmp(new SemVer(v0, loose), '!==', new SemVer(v1, loose)),
-      'cmp(' + v0 + '!==' + v1 + ') object')
+    t.notOk(
+      cmp(new SemVer(v0, loose), '!==', new SemVer(v1, loose)),
+      'cmp(' + v0 + '!==' + v1 + ') object'
+    )
 
-    t.ok(!gt(v0, v1, loose), "!gt('" + v0 + "', '" + v1 + "')")
+    t.notOk(gt(v0, v1, loose), "!gt('" + v0 + "', '" + v1 + "')")
     t.ok(gte(v0, v1, loose), "gte('" + v0 + "', '" + v1 + "')")
-    t.ok(!lt(v0, v1, loose), "!lt('" + v0 + "', '" + v1 + "')")
+    t.notOk(lt(v0, v1, loose), "!lt('" + v0 + "', '" + v1 + "')")
     t.ok(lte(v0, v1, loose), "lte('" + v0 + "', '" + v1 + "')")
   })
   t.end()
@@ -143,7 +152,8 @@ test('equality tests', function (t) {
 test('range tests', function (t) {
   // [range, version]
   // version should be included by range
-  [['1.0.0 - 2.0.0', '1.2.3'],
+  ;[
+    ['1.0.0 - 2.0.0', '1.2.3'],
     ['^1.2.3+build', '1.2.3'],
     ['^1.2.3+build', '1.3.0'],
     ['1.2.3-pre+asdf - 2.4.3-pre+asdf', '1.2.3'],
@@ -258,7 +268,8 @@ test('range tests', function (t) {
 test('negative range tests', function (t) {
   // [range, version]
   // version should not be included by range
-  [['1.0.0 - 2.0.0', '2.2.3'],
+  ;[
+    ['1.0.0 - 2.0.0', '2.2.3'],
     ['1.2.3+asdf - 2.4.3+asdf', '1.2.3-pre.2'],
     ['1.2.3+asdf - 2.4.3+asdf', '2.4.3-alpha'],
     ['^1.2.3+build', '2.0.0'],
@@ -333,7 +344,7 @@ test('negative range tests', function (t) {
     var ver = v[1]
     var loose = v[2]
     var found = satisfies(ver, range, loose)
-    t.ok(!found, ver + ' not satisfied by ' + range)
+    t.notOk(found, ver + ' not satisfied by ' + range)
   })
   t.end()
 })
@@ -341,7 +352,8 @@ test('negative range tests', function (t) {
 test('unlocked prerelease range tests', function (t) {
   // [range, version]
   // version should be included by range
-  [['*', '1.0.0-rc1'],
+  ;[
+    ['*', '1.0.0-rc1'],
     ['^1.0.0', '2.0.0-rc1'],
     ['^1.0.0-0', '1.0.1-rc1'],
     ['^1.0.0-rc2', '1.0.1-rc1'],
@@ -359,22 +371,24 @@ test('unlocked prerelease range tests', function (t) {
 test('negative unlocked prerelease range tests', function (t) {
   // [range, version]
   // version should not be included by range
-  [['^1.0.0', '1.0.0-rc1'],
+  ;[
+    ['^1.0.0', '1.0.0-rc1'],
     ['^1.2.3-rc2', '2.0.0']
   ].forEach(function (v) {
     var range = v[0]
     var ver = v[1]
     var options = { includePrerelease: true }
     var found = satisfies(ver, range, options)
-    t.ok(!found, ver + ' not satisfied by ' + range)
+    t.notOk(found, ver + ' not satisfied by ' + range)
   })
   t.end()
 })
 
 test('increment versions test', function (t) {
-//  [version, inc, result, identifier]
-//  inc(version, inc) -> result
-  [['1.2.3', 'major', '2.0.0'],
+  // [version, inc, result, identifier]
+  // inc(version, inc) -> result
+  ;[
+    ['1.2.3', 'major', '2.0.0'],
     ['1.2.3', 'minor', '1.3.0'],
     ['1.2.3', 'patch', '1.2.4'],
     ['1.2.3tag', 'major', '2.0.0', true],
@@ -455,7 +469,7 @@ test('increment versions test', function (t) {
     ['1.2.0-1', 'minor', '1.2.0', false, 'dev'],
     ['1.0.0-1', 'major', '1.0.0', 'dev'],
     ['1.2.3-dev.bar', 'prerelease', '1.2.3-dev.0', false, 'dev']
-
+    //
   ].forEach(function (v) {
     var pre = v[0]
     var what = v[1]
@@ -484,9 +498,10 @@ test('increment versions test', function (t) {
 })
 
 test('diff versions test', function (t) {
-//  [version1, version2, result]
-//  diff(version1, version2) -> result
-  [['1.2.3', '0.2.3', 'major'],
+  // [version1, version2, result]
+  // diff(version1, version2) -> result
+  ;[
+    ['1.2.3', '0.2.3', 'major'],
     ['1.4.5', '0.2.3', 'major'],
     ['1.2.3', '2.0.0-pre', 'premajor'],
     ['1.2.3', '1.3.3', 'minor'],
@@ -498,7 +513,7 @@ test('diff versions test', function (t) {
     ['1.1.0', '1.1.0-pre', 'prerelease'],
     ['1.1.0-pre-1', '1.1.0-pre-2', 'prerelease'],
     ['1.0.0', '1.0.0', null]
-
+    //
   ].forEach(function (v) {
     var version1 = v[0]
     var version2 = v[1]
@@ -515,7 +530,8 @@ test('valid range test', function (t) {
   // [range, result]
   // validRange(range) -> result
   // translate ranges into their canonical form
-  [['1.0.0 - 2.0.0', '>=1.0.0 <=2.0.0'],
+  ;[
+    ['1.0.0 - 2.0.0', '>=1.0.0 <=2.0.0'],
     ['1.0.0', '1.0.0'],
     ['>=*', '*'],
     ['', '*'],
@@ -602,7 +618,8 @@ test('valid range test', function (t) {
 test('comparators test', function (t) {
   // [range, comparators]
   // turn range into a set of individual comparators
-  [['1.0.0 - 2.0.0', [['>=1.0.0', '<=2.0.0']]],
+  ;[
+    ['1.0.0 - 2.0.0', [['>=1.0.0', '<=2.0.0']]],
     ['1.0.0', [['1.0.0']]],
     ['>=*', [['']]],
     ['', [['']]],
@@ -638,12 +655,14 @@ test('comparators test', function (t) {
     ['||', [[''], ['']]],
     ['2.x.x', [['>=2.0.0', '<3.0.0']]],
     ['1.2.x', [['>=1.2.0', '<1.3.0']]],
-    ['1.2.x || 2.x', [['>=1.2.0', '<1.3.0'], ['>=2.0.0', '<3.0.0']]],
+    // prettier-ignore
+    // ['1.2.x || 2.x', [['>=1.2.0', '<1.3.0'], ['>=2.0.0', '<3.0.0']]],
     ['1.2.x || 2.x', [['>=1.2.0', '<1.3.0'], ['>=2.0.0', '<3.0.0']]],
     ['x', [['']]],
     ['2.*.*', [['>=2.0.0', '<3.0.0']]],
     ['1.2.*', [['>=1.2.0', '<1.3.0']]],
-    ['1.2.* || 2.*', [['>=1.2.0', '<1.3.0'], ['>=2.0.0', '<3.0.0']]],
+    // prettier-ignore
+    // ['1.2.* || 2.*', [['>=1.2.0', '<1.3.0'], ['>=2.0.0', '<3.0.0']]],
     ['1.2.* || 2.*', [['>=1.2.0', '<1.3.0'], ['>=2.0.0', '<3.0.0']]],
     ['*', [['']]],
     ['2', [['>=2.0.0', '<3.0.0']]],
@@ -676,14 +695,16 @@ test('comparators test', function (t) {
     var wanted = v[1]
     var found = toComparators(v[0])
     var jw = JSON.stringify(wanted)
-    t.equivalent(found, wanted, 'toComparators(' + pre + ') === ' + jw)
+    t.deepEqual(found, wanted, 'toComparators(' + pre + ') === ' + jw)
   })
 
   t.end()
 })
 
 test('invalid version numbers', function (t) {
-  ['1.2.3.4',
+  ;[
+    //
+    '1.2.3.4',
     'NOT VALID',
     1.2,
     null,
@@ -691,14 +712,15 @@ test('invalid version numbers', function (t) {
   ].forEach(function (v) {
     t.throws(function () {
       new SemVer(v) // eslint-disable-line no-new
-    }, { name: 'TypeError', message: 'Invalid Version: ' + v })
+    }, new RegExp('^TypeError: Invalid Version: ' + v))
   })
 
   t.end()
 })
 
 test('strict vs loose version numbers', function (t) {
-  [['=1.2.3', '1.2.3'],
+  ;[
+    ['=1.2.3', '1.2.3'],
     ['01.02.03', '1.2.3'],
     ['1.2.3-beta.01', '1.2.3-beta.1'],
     ['   =1.2.3', '1.2.3'],
@@ -744,21 +766,22 @@ test('rcompareIdentifiers and compareIdentifiers', function (t) {
   var set = [
     ['1', '2'],
     ['alpha', 'beta'],
-    ['0', 'beta'],
+    ['0', 'beta']
   ]
   set.forEach(function (ab) {
     var a = ab[0]
     var b = ab[1]
-    t.equal(semver.compareIdentifiers(a, b), -1)
-    t.equal(semver.rcompareIdentifiers(a, b), 1)
+    t.equal(compareIdentifiers(a, b), -1)
+    t.equal(rcompareIdentifiers(a, b), 1)
   })
-  t.equal(semver.compareIdentifiers('0', '0'), 0)
-  t.equal(semver.rcompareIdentifiers('0', '0'), 0)
+  t.equal(compareIdentifiers('0', '0'), 0)
+  t.equal(rcompareIdentifiers('0', '0'), 0)
   t.end()
 })
 
 test('strict vs loose ranges', function (t) {
-  [['>=01.02.03', '>=1.2.3'],
+  ;[
+    ['>=01.02.03', '>=1.2.3'],
     ['~1.02.03beta', '>=1.2.3-beta <1.3.0']
   ].forEach(function (v) {
     var loose = v[0]
@@ -772,39 +795,71 @@ test('strict vs loose ranges', function (t) {
 })
 
 test('max satisfying', function (t) {
-  [[['1.2.3', '1.2.4'], '1.2', '1.2.4'],
+  ;[
+    [['1.2.3', '1.2.4'], '1.2', '1.2.4'],
     [['1.2.4', '1.2.3'], '1.2', '1.2.4'],
     [['1.2.3', '1.2.4', '1.2.5', '1.2.6'], '~1.2.3', '1.2.6'],
-    [['1.1.0', '1.2.0', '1.2.1', '1.3.0', '2.0.0b1', '2.0.0b2', '2.0.0b3', '2.0.0', '2.1.0'], '~2.0.0', '2.0.0', true]
+    [
+      [
+        '1.1.0',
+        '1.2.0',
+        '1.2.1',
+        '1.3.0',
+        '2.0.0b1',
+        '2.0.0b2',
+        '2.0.0b3',
+        '2.0.0',
+        '2.1.0'
+      ],
+      '~2.0.0',
+      '2.0.0',
+      true
+    ]
   ].forEach(function (v) {
     var versions = v[0]
     var range = v[1]
     var expect = v[2]
     var loose = v[3]
-    var actual = semver.maxSatisfying(versions, range, loose)
+    var actual = maxSatisfying(versions, range, loose)
     t.equal(actual, expect)
   })
   t.end()
 })
 
 test('min satisfying', function (t) {
-  [[['1.2.3', '1.2.4'], '1.2', '1.2.3'],
+  ;[
+    [['1.2.3', '1.2.4'], '1.2', '1.2.3'],
     [['1.2.4', '1.2.3'], '1.2', '1.2.3'],
     [['1.2.3', '1.2.4', '1.2.5', '1.2.6'], '~1.2.3', '1.2.3'],
-    [['1.1.0', '1.2.0', '1.2.1', '1.3.0', '2.0.0b1', '2.0.0b2', '2.0.0b3', '2.0.0', '2.1.0'], '~2.0.0', '2.0.0', true]
+    [
+      [
+        '1.1.0',
+        '1.2.0',
+        '1.2.1',
+        '1.3.0',
+        '2.0.0b1',
+        '2.0.0b2',
+        '2.0.0b3',
+        '2.0.0',
+        '2.1.0'
+      ],
+      '~2.0.0',
+      '2.0.0',
+      true
+    ]
   ].forEach(function (v) {
     var versions = v[0]
     var range = v[1]
     var expect = v[2]
     var loose = v[3]
-    var actual = semver.minSatisfying(versions, range, loose)
+    var actual = minSatisfying(versions, range, loose)
     t.equal(actual, expect)
   })
   t.end()
 })
 
 test('intersect comparators', function (t) {
-  [
+  ;[
     // One is a Version
     ['1.3.0', '>=1.3.0', true],
     ['1.3.0', '>1.3.0', false],
@@ -842,14 +897,14 @@ test('intersect comparators', function (t) {
 
     var actual1 = comparator1.intersects(comparator2, false)
     var actual2 = comparator2.intersects(comparator1, { loose: false })
-    var actual3 = semver.intersects(comparator1, comparator2)
-    var actual4 = semver.intersects(comparator2, comparator1)
-    var actual5 = semver.intersects(comparator1, comparator2, true)
-    var actual6 = semver.intersects(comparator2, comparator1, true)
-    var actual7 = semver.intersects(v[0], v[1])
-    var actual8 = semver.intersects(v[1], v[0])
-    var actual9 = semver.intersects(v[0], v[1], true)
-    var actual10 = semver.intersects(v[1], v[0], true)
+    var actual3 = intersects(comparator1, comparator2)
+    var actual4 = intersects(comparator2, comparator1)
+    var actual5 = intersects(comparator1, comparator2, true)
+    var actual6 = intersects(comparator2, comparator1, true)
+    var actual7 = intersects(v[0], v[1])
+    var actual8 = intersects(v[1], v[0])
+    var actual9 = intersects(v[0], v[1], true)
+    var actual10 = intersects(v[1], v[0], true)
     t.equal(actual1, expect)
     t.equal(actual2, expect)
     t.equal(actual3, expect)
@@ -865,15 +920,18 @@ test('intersect comparators', function (t) {
 })
 
 test('missing comparator parameter in intersect comparators', function (t) {
-  t.throws(function () {
-    new Comparator('>1.0.0').intersects()
-  }, new TypeError('a Comparator is required'),
-  'throws type error')
+  t.throws(
+    function () {
+      new Comparator('>1.0.0').intersects()
+    },
+    /^TypeError: a Comparator is required/,
+    'throws type error'
+  )
   t.end()
 })
 
 test('ranges intersect', function (t) {
-  [
+  ;[
     ['1.3.0 || <1.0.0 >2.0.0', '1.3.0 || <1.0.0 >2.0.0', true],
     ['<1.0.0 >2.0.0', '>0.0.0', true],
     ['<1.0.0 >2.0.0', '>1.4.0 <1.6.0', false],
@@ -887,14 +945,14 @@ test('ranges intersect', function (t) {
     var expect = v[2]
     var actual1 = range1.intersects(range2)
     var actual2 = range2.intersects(range1)
-    var actual3 = semver.intersects(v[1], v[0])
-    var actual4 = semver.intersects(v[0], v[1])
-    var actual5 = semver.intersects(v[1], v[0], true)
-    var actual6 = semver.intersects(v[0], v[1], true)
-    var actual7 = semver.intersects(range1, range2)
-    var actual8 = semver.intersects(range2, range1)
-    var actual9 = semver.intersects(range1, range2, true)
-    var actual0 = semver.intersects(range2, range1, true)
+    var actual3 = intersects(v[1], v[0])
+    var actual4 = intersects(v[0], v[1])
+    var actual5 = intersects(v[1], v[0], true)
+    var actual6 = intersects(v[0], v[1], true)
+    var actual7 = intersects(range1, range2)
+    var actual8 = intersects(range2, range1)
+    var actual9 = intersects(range1, range2, true)
+    var actual0 = intersects(range2, range1, true)
     t.equal(actual1, expect)
     t.equal(actual2, expect)
     t.equal(actual3, expect)
@@ -910,17 +968,20 @@ test('ranges intersect', function (t) {
 })
 
 test('missing range parameter in range intersect', function (t) {
-  t.throws(function () {
-    new Range('1.0.0').intersects()
-  }, new TypeError('a Range is required'),
-  'throws type error')
+  t.throws(
+    function () {
+      new Range('1.0.0').intersects()
+    },
+    /^TypeError: a Range is required/,
+    'throws type error'
+  )
   t.end()
 })
 
 test('outside with bad hilo throws', function (t) {
   t.throws(function () {
     semver.outside('1.2.3', '>1.5.0', 'blerg', true)
-  }, new TypeError('Must provide a hilo val of "<" or ">"'))
+  }, /^TypeError: Must provide a hilo val of "<" or ">"/)
   t.end()
 })
 
@@ -934,7 +995,7 @@ test('comparator testing', function (t) {
   t.end()
 })
 
-test('tostrings', function (t) {
+test('toStrings', function (t) {
   t.equal(Range('>= v1.2.3').toString(), '>=1.2.3')
   t.equal(Comparator('>= v1.2.3').toString(), '>=1.2.3')
   t.end()
@@ -943,22 +1004,25 @@ test('tostrings', function (t) {
 test('invalid cmp usage', function (t) {
   t.throws(function () {
     cmp('1.2.3', 'a frog', '4.5.6')
-  }, new TypeError('Invalid operator: a frog'))
+  }, /^TypeError: Invalid operator: a frog/)
   t.end()
 })
 
 test('sorting', function (t) {
   var list = [
+    //
     '1.2.3',
     '5.9.6',
     '0.1.2'
   ]
   var sorted = [
+    //
     '0.1.2',
     '1.2.3',
     '5.9.6'
   ]
   var rsorted = [
+    //
     '5.9.6',
     '1.2.3',
     '0.1.2'
@@ -970,13 +1034,13 @@ test('sorting', function (t) {
 
 test('bad ranges in max/min satisfying', function (t) {
   var r = 'some frogs and sneks-v2.5.6'
-  t.equal(semver.maxSatisfying([], r), null)
-  t.equal(semver.minSatisfying([], r), null)
+  t.equal(maxSatisfying([], r), null)
+  t.equal(minSatisfying([], r), null)
   t.end()
 })
 
 test('really big numeric prerelease value', function (t) {
   var r = SemVer('1.2.3-beta.' + Number.MAX_SAFE_INTEGER + '0')
-  t.strictSame(r.prerelease, [ 'beta', '90071992547409910' ])
+  t.same(r.prerelease, ['beta', '90071992547409910'])
   t.end()
 })
