@@ -1,27 +1,32 @@
 {
-  "name": "semver",
+  "name": "semver-ts",
   "version": "5.7.1",
-  "description": "The semantic version parser used by npm.",
-  "main": "semver.js",
+  "description": "The semantic version parser for Node.js in TypeScript",
+  "main": "lib/semver.js",
   "scripts": {
-    "test": "tap",
-    "preversion": "npm test",
-    "postversion": "npm publish",
-    "postpublish": "git push origin --all; git push origin --tags"
+    "build": "node node_modules/typescript/bin/tsc src/*.ts --target es5 --outDir lib",
+    "test": "node node_modules/tape/bin/tape test/**/*.js"
   },
   "devDependencies": {
-    "tap": "^13.0.0-rc.18"
+    "@types/node": "^4.9.0",
+    "tape": "^4.10.0",
+    "typescript": "^3.4.0"
   },
   "license": "ISC",
-  "repository": "https://github.com/npm/node-semver",
+  "repository": "thachnn/semver-ts",
   "bin": {
-    "semver": "./bin/semver"
+    "semver": "./lib/bin.js"
   },
   "files": [
-    "bin",
-    "range.bnf",
-    "semver.js"
+    "lib/",
+    "src/",
+    "*.bnf"
   ],
+  "prettier": {
+    "trailingComma": "none",
+    "semi": false,
+    "singleQuote": true
+  },
   "tap": {
     "check-coverage": true
   }

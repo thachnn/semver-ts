@@ -1,18 +1,17 @@
-semver(1) -- The semantic versioner for npm
-===========================================
+# semver-ts -- The semantic versioner for Node.js in TypeScript
 
 ## Install
 
 ```bash
-npm install --save semver
-````
+npm install --save semver-ts
+```
 
 ## Usage
 
 As a node module:
 
 ```js
-const semver = require('semver')
+const semver = require('semver-ts')
 
 semver.valid('1.2.3') // '1.2.3'
 semver.valid('a.b.c') // null
@@ -142,7 +141,7 @@ Note that this behavior can be suppressed (treating all prerelease
 versions as if they were normal versions, for the purpose of range
 matching) by setting the `includePrerelease` flag on the options
 object to any
-[functions](https://github.com/npm/node-semver#functions) that do
+[functions](#functions) that do
 range matching.
 
 #### Prerelease Identifiers
@@ -286,7 +285,7 @@ simple     ::= primitive | partial | tilde | caret
 primitive  ::= ( '<' | '>' | '>=' | '<=' | '=' ) partial
 partial    ::= xr ( '.' xr ( '.' xr qualifier ? )? )?
 xr         ::= 'x' | 'X' | '*' | nr
-nr         ::= '0' | ['1'-'9'] ( ['0'-'9'] ) *
+nr         ::= '0' | [1-9] ( [0-9] ) *
 tilde      ::= '~' partial
 caret      ::= '^' partial
 qualifier  ::= ( '-' pre )? ( '+' build )?
@@ -308,7 +307,7 @@ are:
   argument is a boolean value instead of an object, it is interpreted
   to be the `loose` param.
 - `includePrerelease`  Set to suppress the [default
-  behavior](https://github.com/npm/node-semver#prerelease-tags) of
+  behavior](#prerelease-tags) of
   excluding prerelease tagged versions from ranges unless they are
   explicitly opted into.
 
@@ -317,7 +316,7 @@ strings that they parse.
 
 * `valid(v)`: Return the parsed version, or null if it's not valid.
 * `inc(v, release)`: Return the version incremented by the release
-  type (`major`,   `premajor`, `minor`, `preminor`, `patch`,
+  type (`major`, `premajor`, `minor`, `preminor`, `patch`,
   `prepatch`, or `prerelease`), or null if it's not valid
   * `premajor` in one call will bump the version up to the next major
     version and down to a prerelease of that major version.
@@ -405,7 +404,7 @@ remaining characters which satisfy at least a partial semver (e.g., `1`,
 versions are simply truncated (`4.6.3.9.2-alpha2` becomes `4.6.3`).  All
 surrounding text is simply ignored (`v3.4 replaces v3.3.1` becomes
 `3.4.0`).  Only text which lacks digits will fail coercion (`version one`
-is not valid).  The maximum  length for any semver component considered for
+is not valid).  The maximum length for any semver component considered for
 coercion is 16 characters; longer components will be ignored
 (`10000000000000000.4.7.4` becomes `4.7.4`).  The maximum value for any
 semver component is `Number.MAX_SAFE_INTEGER || (2**53 - 1)`; higher value

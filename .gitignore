@@ -1,5 +1,7 @@
-/node_modules
+node_modules/
+/*.log
 .*.swp
 coverage/
 .nyc_output/
-.idea
+.idea/
+.vscode/
