@@ -1,6 +1,6 @@
 /// exports = module.exports = SemVer
 
-let debug: Function
+let debug
 /* istanbul ignore next */
 if (
   typeof process === 'object' &&
@@ -9,7 +9,7 @@ if (
   /\bsemver\b/i.test(process.env.NODE_DEBUG)
 ) {
   debug = function () {
-    const args: any = Array.prototype.slice.call(arguments, 0)
+    const args = Array.prototype.slice.call(arguments, 0)
     args.unshift('SEMVER')
     console.log.apply(console, args)
   }
@@ -22,14 +22,14 @@ if (
 export const SEMVER_SPEC_VERSION = '2.0.0'
 
 const MAX_LENGTH = 256
-const MAX_SAFE_INTEGER = (<any>Number).MAX_SAFE_INTEGER || 9007199254740991
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991
 
 // Max safe segment length for coercion.
 const MAX_SAFE_COMPONENT_LENGTH = 16
 
 // The actual regexps go on exports.re
-export const re: RegExp[] = []
-export const src: string[] = []
+export const re = []
+export const src = []
 let R = 0
 
 // The following Regular Expressions can be used for tokenizing,
@@ -208,31 +208,10 @@ for (let i = 0; i < R; i++) {
   }
 }
 
-export interface Options {
-  loose?: boolean
-  includePrerelease?: boolean
-}
-
-export type ReleaseType =
-  | 'major'
-  | 'premajor'
-  | 'minor'
-  | 'preminor'
-  | 'patch'
-  | 'prepatch'
-  | 'pre'
-  | 'prerelease'
-
-export type CompareResult = 1 | 0 | -1
-export type Operator = '' | '=' | '<' | '>' | '<=' | '>='
-
 /**
  * Return the parsed version as a SemVer object, or null if it's not valid.
  */
-export function parse(
-  version: string | SemVer | null | undefined,
-  options?: boolean | Options
-): SemVer | null {
+export function parse(version, options) {
   if (!options || typeof options !== 'object') {
     options = {
       loose: !!options,
@@ -267,10 +246,7 @@ export function parse(
 /**
  * Return the parsed version as a string, or null if it's not valid.
  */
-export function valid(
-  version: string | SemVer | null | undefined,
-  options?: boolean | Options
-): string | null {
+export function valid(version, options) {
   const v = parse(version, options)
   return v ? v.version : null
 }
@@ -279,24 +255,13 @@ export function valid(
  * Returns cleaned (removed leading/trailing whitespace, remove '=v' prefix) and
  * parsed version, or null if version is invalid.
  */
-export function clean(version: string, options?: boolean | Options): string | null {
+export function clean(version, options) {
   const s = parse(version.trim().replace(/^[=v]+/, ''), options)
   return s ? s.version : null
 }
 
 export class SemVer {
-  raw: string
-  readonly loose: boolean
-  readonly options: Options
-
-  major: number
-  minor: number
-  patch: number
-  version!: string
-  build: ReadonlyArray<string>
-  prerelease: Array<string | number>
-
-  constructor(version: string | SemVer, options?: boolean | Options) {
+  constructor(version, options) {
     if (!options || typeof options !== 'object') {
       options = {
         loose: !!options,
@@ -368,7 +333,7 @@ export class SemVer {
     this.format()
   }
 
-  format(): string {
+  format() {
     this.version = `${this.major}.${this.minor}.${this.patch}`
     if (this.prerelease.length) {
       this.version += '-' + this.prerelease.join('.')
@@ -376,7 +341,7 @@ export class SemVer {
     return this.version
   }
 
-  toString(): string {
+  toString() {
     return this.version
   }
 
@@ -389,7 +354,7 @@ export class SemVer {
    * - `1` if `this` is greater
    * - `-1` if `other` is greater
    */
-  compare(other: string | SemVer): CompareResult {
+  compare(other) {
     debug('SemVer.compare', this.version, this.options, other)
     if (!(other instanceof SemVer)) {
       other = new SemVer(other, this.options)
@@ -406,7 +371,7 @@ export class SemVer {
    * - `1` if `this` is greater
    * - `-1` if `other` is greater
    */
-  compareMain(other: string | SemVer): CompareResult {
+  compareMain(other) {
     if (!(other instanceof SemVer)) {
       other = new SemVer(other, this.options)
     }
@@ -426,7 +391,7 @@ export class SemVer {
    * - `1` if `this` is greater
    * - `-1` if `other` is greater
    */
-  comparePre(other: string | SemVer): CompareResult {
+  comparePre(other) {
     if (!(other instanceof SemVer)) {
       other = new SemVer(other, this.options)
     }
@@ -462,7 +427,7 @@ export class SemVer {
    * preminor will bump the version up to the next minor release, and immediately
    * down to pre-release. premajor and prepatch work the same way.
    */
-  inc(release: ReleaseType, identifier?: string | number): this {
+  inc(release, identifier) {
     switch (release) {
       case 'premajor':
         this.prerelease.length = 0
@@ -534,7 +499,7 @@ export class SemVer {
           this.prerelease = [0]
         } else {
           let i = this.prerelease.length
-          let pr: string | number
+          let pr
           while (--i >= 0) {
             if (typeof (pr = this.prerelease[i]) === 'number') {
               this.prerelease[i] = pr + 1
@@ -550,7 +515,7 @@ export class SemVer {
           // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
           // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
           if (this.prerelease[0] === identifier) {
-            if (isNaN(this.prerelease[1] as number)) {
+            if (isNaN(this.prerelease[1])) {
               this.prerelease = [identifier, 0]
             }
           } else {
@@ -572,39 +537,14 @@ export class SemVer {
  * Return the version incremented by the release type (major, minor, patch, or
  * prerelease), or null if it's not valid.
  */
-export function inc(
-  version: string | SemVer,
-  release: ReleaseType,
-  loose?: boolean | Options,
-  identifier?: string | number
-): string | null
-
-export function inc(
-  version: string | SemVer,
-  release: ReleaseType,
-  identifier?: string | number
-): string | null
-
-/**
- * Return the version incremented by the release type (major, minor, patch, or
- * prerelease), or null if it's not valid.
- */
-export function inc(
-  version: string | SemVer,
-  release: ReleaseType,
-  loose?: boolean | Options | typeof identifier,
-  identifier?: string | number
-): string | null {
+export function inc(version, release, loose, identifier) {
   if (typeof loose === 'string' || typeof loose === 'number') {
     identifier = loose
     loose = undefined
   }
 
   try {
-    return new SemVer(version, <boolean | Options | undefined>loose).inc(
-      release,
-      identifier
-    ).version
+    return new SemVer(version, loose).inc(release, identifier).version
   } catch (_) {
     return null
   }
@@ -615,19 +555,15 @@ export function inc(
  * minor, preminor, patch, prepatch, or prerelease), or null if the versions are
  * the same.
  */
-export function diff(
-  version1: string | SemVer,
-  version2: string | SemVer,
-  loose?: boolean | Options
-): ReleaseType | null | undefined {
+export function diff(version1, version2, loose) {
   if (eq(version1, version2, loose)) {
     return null
   }
 
-  const v1 = parse(version1, loose) as SemVer
-  const v2 = parse(version2, loose) as SemVer
+  const v1 = parse(version1, loose)
+  const v2 = parse(version2, loose)
   let prefix = ''
-  let defaultResult: ReleaseType | undefined
+  let defaultResult
   if (v1.prerelease.length || v2.prerelease.length) {
     prefix = 'pre'
     defaultResult = 'prerelease'
@@ -635,7 +571,7 @@ export function diff(
   for (const key in v1) {
     if (key === 'major' || key === 'minor' || key === 'patch') {
       if (v1[key] !== v2[key]) {
-        return (prefix + key) as ReleaseType
+        return prefix + key
       }
     }
   }
@@ -648,12 +584,9 @@ const numeric = /^[0-9]+$/
  *
  * Sorts in ascending order when passed to `Array.sort()`.
  */
-export function compareIdentifiers(
-  a: string | number,
-  b: string | number
-): CompareResult {
-  const anum = numeric.test(a as string)
-  const bnum = numeric.test(b as string)
+export function compareIdentifiers(a, b) {
+  const anum = numeric.test(a)
+  const bnum = numeric.test(b)
 
   if (anum && bnum) {
     a = +a
@@ -676,31 +609,28 @@ export function compareIdentifiers(
  *
  * Sorts in descending order when passed to `Array.sort()`.
  */
-export function rcompareIdentifiers(
-  a: string | number,
-  b: string | number
-): CompareResult {
+export function rcompareIdentifiers(a, b) {
   return compareIdentifiers(b, a)
 }
 
 /**
  * Return the major version number.
  */
-export function major(a: string | SemVer, loose?: boolean | Options): number {
+export function major(a, loose) {
   return new SemVer(a, loose).major
 }
 
 /**
  * Return the minor version number.
  */
-export function minor(a: string | SemVer, loose?: boolean | Options): number {
+export function minor(a, loose) {
   return new SemVer(a, loose).minor
 }
 
 /**
  * Return the patch version number.
  */
-export function patch(a: string | SemVer, loose?: boolean | Options): number {
+export function patch(a, loose) {
   return new SemVer(a, loose).patch
 }
 
@@ -715,15 +645,11 @@ export function patch(a: string | SemVer, loose?: boolean | Options): number {
  * - `1` if `v1` is greater
  * - `-1` if `v2` is greater
  */
-export function compare(
-  a: string | SemVer,
-  b: string | SemVer,
-  loose?: boolean | Options
-): CompareResult {
+export function compare(a, b, loose) {
   return new SemVer(a, loose).compare(new SemVer(b, loose))
 }
 
-export function compareLoose(a: string | SemVer, b: string | SemVer): CompareResult {
+export function compareLoose(a, b) {
   return compare(a, b, true)
 }
 
@@ -732,49 +658,31 @@ export function compareLoose(a: string | SemVer, b: string | SemVer): CompareRes
  *
  * Sorts in descending order when passed to `Array.sort()`.
  */
-export function rcompare(
-  a: string | SemVer,
-  b: string | SemVer,
-  loose?: boolean | Options
-): CompareResult {
+export function rcompare(a, b, loose) {
   return compare(b, a, loose)
 }
 
 /**
  * Sorts an array of semver entries in ascending order using `compareBuild()`.
  */
-export function sort<T extends string | SemVer>(
-  list: T[],
-  loose?: boolean | Options
-): T[] {
+export function sort(list, loose) {
   return list.sort((a, b) => compare(a, b, loose))
 }
 
 /**
  * Sorts an array of semver entries in descending order using `compareBuild()`.
  */
-export function rsort<T extends string | SemVer>(
-  list: T[],
-  loose?: boolean | Options
-): T[] {
+export function rsort(list, loose) {
   return list.sort((a, b) => rcompare(a, b, loose))
 }
 
 /** v1 > v2 */
-export function gt(
-  a: string | SemVer,
-  b: string | SemVer,
-  loose?: boolean | Options
-): boolean {
+export function gt(a, b, loose) {
   return compare(a, b, loose) > 0
 }
 
 /** v1 < v2 */
-export function lt(
-  a: string | SemVer,
-  b: string | SemVer,
-  loose?: boolean | Options
-): boolean {
+export function lt(a, b, loose) {
   return compare(a, b, loose) < 0
 }
 
@@ -782,40 +690,24 @@ export function lt(
  * v1 == v2 This is true if they're logically equivalent, even if they're not
  * the exact same string. You already know how to compare strings.
  */
-export function eq(
-  a: string | SemVer,
-  b: string | SemVer,
-  loose?: boolean | Options
-): boolean {
+export function eq(a, b, loose) {
   return compare(a, b, loose) === 0
 }
 
 /**
  * v1 != v2 The opposite of eq.
  */
-export function neq(
-  a: string | SemVer,
-  b: string | SemVer,
-  loose?: boolean | Options
-): boolean {
+export function neq(a, b, loose) {
   return compare(a, b, loose) !== 0
 }
 
 /** v1 >= v2 */
-export function gte(
-  a: string | SemVer,
-  b: string | SemVer,
-  loose?: boolean | Options
-): boolean {
+export function gte(a, b, loose) {
   return compare(a, b, loose) >= 0
 }
 
 /** v1 <= v2 */
-export function lte(
-  a: string | SemVer,
-  b: string | SemVer,
-  loose?: boolean | Options
-): boolean {
+export function lte(a, b, loose) {
   return compare(a, b, loose) <= 0
 }
 
@@ -824,12 +716,7 @@ export function lte(
  * function. "===" and "!==" do simple string comparison, but are included for
  * completeness. Throws if an invalid comparison string is provided.
  */
-export function cmp(
-  a: string | SemVer,
-  op: '===' | '!==' | '==' | '!=' | Operator,
-  b: string | SemVer,
-  loose?: boolean | Options
-): boolean {
+export function cmp(a, op, b, loose) {
   switch (op) {
     case '===':
       if (typeof a === 'object') a = a.version
@@ -866,15 +753,9 @@ export function cmp(
   }
 }
 
-const ANY = {} as SemVer
+const ANY = {}
 export class Comparator {
-  semver!: SemVer
-  operator!: Operator
-  readonly value: string
-  readonly loose: boolean
-  readonly options: Options
-
-  constructor(comp: string | Comparator, options?: boolean | Options) {
+  constructor(comp, options) {
     if (!options || typeof options !== 'object') {
       options = {
         loose: !!options,
@@ -908,14 +789,14 @@ export class Comparator {
     debug('comp', this)
   }
 
-  parse(comp: string): void {
+  parse(comp) {
     const r = this.options.loose ? re[COMPARATORLOOSE] : re[COMPARATOR]
     const m = comp.match(r)
     if (!m) {
       throw new TypeError('Invalid comparator: ' + comp)
     }
 
-    this.operator = m[1] as Operator
+    this.operator = m[1]
     if (this.operator === '=') {
       this.operator = ''
     }
@@ -928,11 +809,11 @@ export class Comparator {
     }
   }
 
-  toString(): string {
+  toString() {
     return this.value
   }
 
-  test(version: string | SemVer): boolean {
+  test(version) {
     debug('Comparator.test', version, this.options.loose)
 
     if (this.semver === ANY) {
@@ -946,7 +827,7 @@ export class Comparator {
     return cmp(version, this.operator, this.semver, this.options)
   }
 
-  intersects(comp: Comparator, options?: boolean | Options): boolean {
+  intersects(comp, options) {
     if (!(comp instanceof Comparator)) {
       throw new TypeError('a Comparator is required')
     }
@@ -958,7 +839,7 @@ export class Comparator {
       }
     }
 
-    let rangeTmp: Range
+    let rangeTmp
     if (this.operator === '') {
       rangeTmp = new Range(comp.value, options)
       return satisfies(this.value, rangeTmp, options)
@@ -997,15 +878,7 @@ export class Comparator {
 }
 
 export class Range {
-  range!: string
-  readonly raw: string
-  readonly loose: boolean
-  readonly options: Options
-  readonly includePrerelease: boolean
-
-  set: ReadonlyArray<ReadonlyArray<Comparator>>
-
-  constructor(range: string | Range | Comparator, options?: boolean | Options) {
+  constructor(range, options) {
     if (!options || typeof options !== 'object') {
       options = {
         loose: !!options,
@@ -1051,7 +924,7 @@ export class Range {
     this.format()
   }
 
-  format(): string {
+  format() {
     this.range = this.set
       .map((comps) => comps.join(' ').trim())
       .join('||')
@@ -1059,11 +932,11 @@ export class Range {
     return this.range
   }
 
-  toString(): string {
+  toString() {
     return this.range
   }
 
-  parseRange(range: string): ReadonlyArray<Comparator> {
+  parseRange(range) {
     const loose = this.options.loose
     range = range.trim()
     // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
@@ -1100,7 +973,7 @@ export class Range {
     return set.map((comp) => new Comparator(comp, this.options))
   }
 
-  intersects(range: Range, options?: boolean | Options): boolean {
+  intersects(range, options) {
     if (!(range instanceof Range)) {
       throw new TypeError('a Range is required')
     }
@@ -1119,7 +992,7 @@ export class Range {
   /**
    * If ANY of the sets match ALL of its comparators, then pass.
    */
-  test(version: string | SemVer | null | undefined): boolean {
+  test(version) {
     if (!version) {
       return false
     }
@@ -1140,10 +1013,7 @@ export class Range {
 /**
  * Mostly just for testing and legacy API reasons.
  */
-export function toComparators(
-  range: string | Range | Comparator,
-  options?: boolean | Options
-): ReadonlyArray<ReadonlyArray<string>> {
+export function toComparators(range, options) {
   return new Range(range, options).set.map((comp) =>
     comp
       .map((c) => c.value)
@@ -1157,7 +1027,7 @@ export function toComparators(
  * comprised of xranges, tildes, stars, and gtlt's at this point.
  * already replaced the hyphen ranges turn into a set of JUST comparators.
  */
-function parseComparator(comp: string, options: Options): string {
+function parseComparator(comp, options) {
   debug('comp', comp, options)
   comp = replaceCarets(comp, options)
   debug('caret', comp)
@@ -1170,7 +1040,7 @@ function parseComparator(comp: string, options: Options): string {
   return comp
 }
 
-function isX(id: string | null | undefined): boolean {
+function isX(id) {
   return !id || id.toLowerCase() === 'x' || id === '*'
 }
 
@@ -1182,7 +1052,7 @@ function isX(id: string | null | undefined): boolean {
  * ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
  * ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
  */
-function replaceTildes(comp: string, options: Options): string {
+function replaceTildes(comp, options) {
   return comp
     .trim()
     .split(/\s+/)
@@ -1190,11 +1060,11 @@ function replaceTildes(comp: string, options: Options): string {
     .join(' ')
 }
 
-function replaceTilde(comp: string, options: Options): string {
+function replaceTilde(comp, options) {
   const r = options.loose ? re[TILDELOOSE] : re[TILDE]
   return comp.replace(r, (_, M, m, p, pr) => {
     debug('tilde', comp, _, M, m, p, pr)
-    let ret: string
+    let ret
 
     if (isX(M)) {
       ret = ''
@@ -1224,7 +1094,7 @@ function replaceTilde(comp: string, options: Options): string {
  * ^1.2.3 --> >=1.2.3 <2.0.0
  * ^1.2.0 --> >=1.2.0 <2.0.0
  */
-function replaceCarets(comp: string, options: Options): string {
+function replaceCarets(comp, options) {
   return comp
     .trim()
     .split(/\s+/)
@@ -1232,12 +1102,12 @@ function replaceCarets(comp: string, options: Options): string {
     .join(' ')
 }
 
-function replaceCaret(comp: string, options: Options): string {
+function replaceCaret(comp, options) {
   debug('caret', comp, options)
   const r = options.loose ? re[CARETLOOSE] : re[CARET]
   return comp.replace(r, (_, M, m, p, pr) => {
     debug('caret', comp, _, M, m, p, pr)
-    let ret: string
+    let ret
 
     if (isX(M)) {
       ret = ''
@@ -1278,7 +1148,7 @@ function replaceCaret(comp: string, options: Options): string {
   })
 }
 
-function replaceXRanges(comp: string, options: Options): string {
+function replaceXRanges(comp, options) {
   debug('replaceXRanges', comp, options)
   return comp
     .split(/\s+/)
@@ -1286,7 +1156,7 @@ function replaceXRanges(comp: string, options: Options): string {
     .join(' ')
 }
 
-function replaceXRange(comp: string, options: Options): string {
+function replaceXRange(comp, options) {
   comp = comp.trim()
   const r = options.loose ? re[XRANGELOOSE] : re[XRANGE]
   return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
@@ -1357,7 +1227,7 @@ function replaceXRange(comp: string, options: Options): string {
  * Because * is AND-ed with everything else in the comparator,
  * and '' means "any version", just remove the *s entirely.
  */
-function replaceStars(comp: string, options?: boolean | Options): string {
+function replaceStars(comp, options) {
   debug('replaceStars', comp, options)
   // Looseness is ignored here.  star is always as loose as it gets!
   return comp.trim().replace(re[STAR], '')
@@ -1370,11 +1240,7 @@ function replaceStars(comp: string, options?: boolean | Options): string {
  * 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
  * 1.2 - 3.4 => >=1.2.0 <3.5.0
  */
-function hyphenReplace(
-  $0: string,
-  from: any, fM: any, fm: any, fp: any, fpr: any, fb: any,
-  to: any, tM: any, tm: any, tp: any, tpr: any, tb: any
-): string {
+function hyphenReplace($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr, tb) {
   if (isX(fM)) {
     from = ''
   } else if (isX(fm)) {
@@ -1400,12 +1266,8 @@ function hyphenReplace(
   return `${from} ${to}`.trim()
 }
 
-function testSet(
-  set: ReadonlyArray<Comparator>,
-  version: SemVer,
-  options: Options
-): boolean {
-  let i: number
+function testSet(set, version, options) {
+  let i
   for (i = 0; i < set.length; i++) {
     if (!set[i].test(version)) {
       return false
@@ -1446,11 +1308,7 @@ function testSet(
 /**
  * Return true if the version satisfies the range.
  */
-export function satisfies(
-  version: string | SemVer | null | undefined,
-  range: string | Range | Comparator,
-  options?: boolean | Options
-): boolean {
+export function satisfies(version, range, options) {
   try {
     range = new Range(range, options)
   } catch (_) {
@@ -1463,14 +1321,10 @@ export function satisfies(
  * Return the highest version in the list that satisfies the range, or
  * null if none of them do.
  */
-export function maxSatisfying<T extends string | SemVer>(
-  versions: ReadonlyArray<T>,
-  range: string | Range | Comparator,
-  options?: boolean | Options
-): T | null {
-  let max: T | null = null
-  let maxSV = null as unknown as SemVer
-  let rangeObj: Range
+export function maxSatisfying(versions, range, options) {
+  let max = null
+  let maxSV = null
+  let rangeObj
   try {
     rangeObj = new Range(range, options)
   } catch (_) {
@@ -1493,14 +1347,10 @@ export function maxSatisfying<T extends string | SemVer>(
  * Return the lowest version in the list that satisfies the range, or
  * null if none of them do.
  */
-export function minSatisfying<T extends string | SemVer>(
-  versions: ReadonlyArray<T>,
-  range: string | Range | Comparator,
-  options?: boolean | Options
-): T | null {
-  let min: T | null = null
-  let minSV = null as unknown as SemVer
-  let rangeObj: Range
+export function minSatisfying(versions, range, options) {
+  let min = null
+  let minSV = null
+  let rangeObj
   try {
     rangeObj = new Range(range, options)
   } catch (_) {
@@ -1522,13 +1372,10 @@ export function minSatisfying<T extends string | SemVer>(
 /**
  * Return the lowest version that can possibly match the given range.
  */
-export function minVersion(
-  range: string | Range | Comparator,
-  loose?: boolean | Options
-): SemVer | null {
+export function minVersion(range, loose) {
   range = new Range(range, loose)
 
-  let minver: SemVer | null = new SemVer('0.0.0')
+  let minver = new SemVer('0.0.0')
   if (range.test(minver)) {
     return minver
   }
@@ -1581,10 +1428,7 @@ export function minVersion(
 /**
  * Return the valid range or null if it's not valid.
  */
-export function validRange(
-  range: string | Range | Comparator,
-  options?: boolean | Options
-): string | null {
+export function validRange(range, options) {
   try {
     // Return '*' instead of '' so that truthiness works.
     // This will throw if it's invalid anyway
@@ -1597,22 +1441,14 @@ export function validRange(
 /**
  * Determine if version is less than all the versions possible in the range.
  */
-export function ltr(
-  version: string | SemVer,
-  range: string | Range,
-  options?: boolean | Options
-): boolean {
+export function ltr(version, range, options) {
   return outside(version, range, '<', options)
 }
 
 /**
  * Determine if version is greater than all the versions possible in the range.
  */
-export function gtr(
-  version: string | SemVer,
-  range: string | Range,
-  options?: boolean | Options
-): boolean {
+export function gtr(version, range, options) {
   return outside(version, range, '>', options)
 }
 
@@ -1621,16 +1457,11 @@ export function gtr(
  * high or low direction. The hilo argument must be either the string '>' or '<'.
  * (This is the function called by gtr and ltr)
  */
-export function outside(
-  version: string | SemVer,
-  range: string | Range,
-  hilo: '>' | '<',
-  options?: boolean | Options
-): boolean {
+export function outside(version, range, hilo, options) {
   version = new SemVer(version, options)
   range = new Range(range, options)
 
-  let gtfn: Function, ltefn: Function, ltfn: Function, comp: string, ecomp: string
+  let gtfn, ltefn, ltfn, comp, ecomp
   switch (hilo) {
     case '>':
       gtfn = gt
@@ -1661,8 +1492,8 @@ export function outside(
   for (let i = 0; i < range.set.length; ++i) {
     const comparators = range.set[i]
 
-    let high = null as unknown as Comparator
-    let low = null as unknown as Comparator
+    let high = null
+    let low = null
 
     for (let comparator of comparators) {
       if (comparator.semver === ANY) {
@@ -1697,10 +1528,7 @@ export function outside(
 /**
  * Returns an array of prerelease components, or null if none exist.
  */
-export function prerelease(
-  version: string | SemVer,
-  options?: boolean | Options
-): Array<string | number> | null {
+export function prerelease(version, options) {
   const parsed = parse(version, options)
   return parsed && parsed.prerelease.length ? parsed.prerelease : null
 }
@@ -1708,11 +1536,7 @@ export function prerelease(
 /**
  * Return true if any of the ranges comparators intersect.
  */
-export function intersects(
-  r1: string | Range,
-  r2: string | Range,
-  options?: boolean | Options
-): boolean {
+export function intersects(r1, r2, options) {
   r1 = new Range(r1, options)
   r2 = new Range(r2, options)
   return r1.intersects(r2)
@@ -1721,7 +1545,7 @@ export function intersects(
 /**
  * Coerces a string to SemVer if possible.
  */
-export function coerce(version: string | SemVer | null | undefined): SemVer | null {
+export function coerce(version) {
   if (version instanceof SemVer) {
     return version
   }

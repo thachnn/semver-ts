@@ -5,6 +5,7 @@
   "main": "lib/semver.js",
   "scripts": {
     "build": "node node_modules/typescript/bin/tsc src/bin.ts --outDir lib",
+    "build:esm": "node node_modules/typescript/bin/tsc src/semver.ts --outDir esm -d -t es6",
     "test": "node node_modules/tape/bin/tape test/**/*.js"
   },
   "devDependencies": {
