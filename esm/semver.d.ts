@@ -4,9 +4,46 @@
 // Not necessarily the package version of this code.
 export declare const SEMVER_SPEC_VERSION = '2.0.0'
 
+declare type R =
+  | 'NUMERICIDENTIFIER'
+  | 'NUMERICIDENTIFIERLOOSE'
+  | 'NONNUMERICIDENTIFIER'
+  | 'MAINVERSION'
+  | 'MAINVERSIONLOOSE'
+  | 'PRERELEASEIDENTIFIER'
+  | 'PRERELEASEIDENTIFIERLOOSE'
+  | 'PRERELEASE'
+  | 'PRERELEASELOOSE'
+  | 'BUILDIDENTIFIER'
+  | 'BUILD'
+  | 'FULL'
+  | 'LOOSE'
+  | 'GTLT'
+  | 'XRANGEIDENTIFIERLOOSE'
+  | 'XRANGEIDENTIFIER'
+  | 'XRANGEPLAIN'
+  | 'XRANGEPLAINLOOSE'
+  | 'XRANGE'
+  | 'XRANGELOOSE'
+  | 'COERCE'
+  | 'LONETILDE'
+  | 'TILDETRIM'
+  | 'TILDE'
+  | 'TILDELOOSE'
+  | 'LONECARET'
+  | 'CARETTRIM'
+  | 'CARET'
+  | 'CARETLOOSE'
+  | 'COMPARATORLOOSE'
+  | 'COMPARATOR'
+  | 'COMPARATORTRIM'
+  | 'HYPHENRANGE'
+  | 'HYPHENRANGELOOSE'
+  | 'STAR'
+
 // The actual regexps go on exports.re
-export declare const re: RegExp[]
-export declare const src: string[]
+export declare const re: Record<R, RegExp>
+export declare const src: Record<R, string>
 
 export interface Options {
   loose?: boolean

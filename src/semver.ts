@@ -27,69 +27,84 @@ const MAX_SAFE_INTEGER = (<any>Number).MAX_SAFE_INTEGER || 9007199254740991
 // Max safe segment length for coercion.
 const MAX_SAFE_COMPONENT_LENGTH = 16
 
+type R =
+  | 'NUMERICIDENTIFIER'
+  | 'NUMERICIDENTIFIERLOOSE'
+  | 'NONNUMERICIDENTIFIER'
+  | 'MAINVERSION'
+  | 'MAINVERSIONLOOSE'
+  | 'PRERELEASEIDENTIFIER'
+  | 'PRERELEASEIDENTIFIERLOOSE'
+  | 'PRERELEASE'
+  | 'PRERELEASELOOSE'
+  | 'BUILDIDENTIFIER'
+  | 'BUILD'
+  | 'FULL'
+  | 'LOOSE'
+  | 'GTLT'
+  | 'XRANGEIDENTIFIERLOOSE'
+  | 'XRANGEIDENTIFIER'
+  | 'XRANGEPLAIN'
+  | 'XRANGEPLAINLOOSE'
+  | 'XRANGE'
+  | 'XRANGELOOSE'
+  | 'COERCE'
+  | 'LONETILDE'
+  | 'TILDETRIM'
+  | 'TILDE'
+  | 'TILDELOOSE'
+  | 'LONECARET'
+  | 'CARETTRIM'
+  | 'CARET'
+  | 'CARETLOOSE'
+  | 'COMPARATORLOOSE'
+  | 'COMPARATOR'
+  | 'COMPARATORTRIM'
+  | 'HYPHENRANGE'
+  | 'HYPHENRANGELOOSE'
+  | 'STAR'
+
 // The actual regexps go on exports.re
-export const re: RegExp[] = []
-export const src: string[] = []
-let R = 0
+export const re = {} as Record<R, RegExp>
+export const src = {} as Record<R, string>
 
 // The following Regular Expressions can be used for tokenizing,
 // validating, and parsing SemVer version strings.
 
 // ## Numeric Identifier
 // A single `0`, or a non-zero digit followed by zero or more digits.
-
-const NUMERICIDENTIFIER = R++
-src[NUMERICIDENTIFIER] = '0|[1-9]\\d*'
-const NUMERICIDENTIFIERLOOSE = R++
-src[NUMERICIDENTIFIERLOOSE] = '[0-9]+'
+src.NUMERICIDENTIFIER = '0|[1-9]\\d*'
+src.NUMERICIDENTIFIERLOOSE = '[0-9]+'
 
 // ## Non-numeric Identifier
 // Zero or more digits, followed by a letter or hyphen, and then zero or
 // more letters, digits, or hyphens.
-
-const NONNUMERICIDENTIFIER = R++
-src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*'
+src.NONNUMERICIDENTIFIER = '\\d*[a-zA-Z-][a-zA-Z0-9-]*'
 
 // ## Main Version
 // Three dot-separated numeric identifiers.
-
-const MAINVERSION = R++
-src[MAINVERSION] = `(${src[NUMERICIDENTIFIER]})\\.(${src[NUMERICIDENTIFIER]})\\.(${src[NUMERICIDENTIFIER]})`
-
-const MAINVERSIONLOOSE = R++
-src[MAINVERSIONLOOSE] = `(${src[NUMERICIDENTIFIERLOOSE]})\\.(${src[NUMERICIDENTIFIERLOOSE]})\\.(${src[NUMERICIDENTIFIERLOOSE]})`
+src.MAINVERSION = `(${src.NUMERICIDENTIFIER})\\.(${src.NUMERICIDENTIFIER})\\.(${src.NUMERICIDENTIFIER})`
+src.MAINVERSIONLOOSE = `(${src.NUMERICIDENTIFIERLOOSE})\\.(${src.NUMERICIDENTIFIERLOOSE})\\.(${src.NUMERICIDENTIFIERLOOSE})`
 
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
-
-const PRERELEASEIDENTIFIER = R++
-src[PRERELEASEIDENTIFIER] = `(?:${src[NUMERICIDENTIFIER]}|${src[NONNUMERICIDENTIFIER]})`
-
-const PRERELEASEIDENTIFIERLOOSE = R++
-src[PRERELEASEIDENTIFIERLOOSE] = `(?:${src[NUMERICIDENTIFIERLOOSE]}|${src[NONNUMERICIDENTIFIER]})`
+src.PRERELEASEIDENTIFIER = `(?:${src.NUMERICIDENTIFIER}|${src.NONNUMERICIDENTIFIER})`
+src.PRERELEASEIDENTIFIERLOOSE = `(?:${src.NUMERICIDENTIFIERLOOSE}|${src.NONNUMERICIDENTIFIER})`
 
 // ## Pre-release Version
 // Hyphen, followed by one or more dot-separated pre-release version
 // identifiers.
-
-const PRERELEASE = R++
-src[PRERELEASE] = `(?:-(${src[PRERELEASEIDENTIFIER]}(?:\\.${src[PRERELEASEIDENTIFIER]})*))`
-
-const PRERELEASELOOSE = R++
-src[PRERELEASELOOSE] = `(?:-?(${src[PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[PRERELEASEIDENTIFIERLOOSE]})*))`
+src.PRERELEASE = `(?:-(${src.PRERELEASEIDENTIFIER}(?:\\.${src.PRERELEASEIDENTIFIER})*))`
+src.PRERELEASELOOSE = `(?:-?(${src.PRERELEASEIDENTIFIERLOOSE}(?:\\.${src.PRERELEASEIDENTIFIERLOOSE})*))`
 
 // ## Build Metadata Identifier
 // Any combination of digits, letters, or hyphens.
-
-const BUILDIDENTIFIER = R++
-src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+'
+src.BUILDIDENTIFIER = '[0-9A-Za-z-]+'
 
 // ## Build Metadata
 // Plus sign, followed by one or more period-separated build metadata
 // identifiers.
-
-const BUILD = R++
-src[BUILD] = `(?:\\+(${src[BUILDIDENTIFIER]}(?:\\.${src[BUILDIDENTIFIER]})*))`
+src.BUILD = `(?:\\+(${src.BUILDIDENTIFIER}(?:\\.${src.BUILDIDENTIFIER})*))`
 
 // ## Full Version String
 // A main version, followed optionally by a pre-release version and
@@ -99,114 +114,85 @@ src[BUILD] = `(?:\\+(${src[BUILDIDENTIFIER]}(?:\\.${src[BUILDIDENTIFIER]})*))`
 // the version string are capturing groups.  The build metadata is not a
 // capturing group, because it should not ever be used in version
 // comparison.
-
-const FULL = R++
-const FULLPLAIN = `v?${src[MAINVERSION]}${src[PRERELEASE]}?${src[BUILD]}?`
-
-src[FULL] = `^${FULLPLAIN}\$`
+const FULLPLAIN = `v?${src.MAINVERSION}${src.PRERELEASE}?${src.BUILD}?`
+src.FULL = `^${FULLPLAIN}\$`
 
 // like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
 // also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
 // common in the npm registry.
-const LOOSEPLAIN = `[v=\\s]*${src[MAINVERSIONLOOSE]}${src[PRERELEASELOOSE]}?${src[BUILD]}?`
+const LOOSEPLAIN = `[v=\\s]*${src.MAINVERSIONLOOSE}${src.PRERELEASELOOSE}?${src.BUILD}?`
+src.LOOSE = `^${LOOSEPLAIN}\$`
 
-const LOOSE = R++
-src[LOOSE] = `^${LOOSEPLAIN}\$`
-
-const GTLT = R++
-src[GTLT] = '((?:<|>)?=?)'
+src.GTLT = '((?:<|>)?=?)'
 
 // Something like "2.*" or "1.2.x".
 // Note that "x.x" is a valid xRange identifier, meaning "any version"
 // Only the first item is strictly required.
-const XRANGEIDENTIFIERLOOSE = R++
-src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*'
-const XRANGEIDENTIFIER = R++
-src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*'
+src.XRANGEIDENTIFIERLOOSE = src.NUMERICIDENTIFIERLOOSE + '|x|X|\\*'
+src.XRANGEIDENTIFIER = src.NUMERICIDENTIFIER + '|x|X|\\*'
 
-const XRANGEPLAIN = R++
-src[XRANGEPLAIN] = `[v=\\s]*(${src[XRANGEIDENTIFIER]})(?:\\.(${src[XRANGEIDENTIFIER]})(?:\\.(${src[XRANGEIDENTIFIER]})(?:${src[PRERELEASE]})?${src[BUILD]}?)?)?`
+src.XRANGEPLAIN = `[v=\\s]*(${src.XRANGEIDENTIFIER})(?:\\.(${src.XRANGEIDENTIFIER})(?:\\.(${src.XRANGEIDENTIFIER})(?:${src.PRERELEASE})?${src.BUILD}?)?)?`
+src.XRANGEPLAINLOOSE = `[v=\\s]*(${src.XRANGEIDENTIFIERLOOSE})(?:\\.(${src.XRANGEIDENTIFIERLOOSE})(?:\\.(${src.XRANGEIDENTIFIERLOOSE})(?:${src.PRERELEASELOOSE})?${src.BUILD}?)?)?`
 
-const XRANGEPLAINLOOSE = R++
-src[XRANGEPLAINLOOSE] = `[v=\\s]*(${src[XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[XRANGEIDENTIFIERLOOSE]})(?:${src[PRERELEASELOOSE]})?${src[BUILD]}?)?)?`
-
-const XRANGE = R++
-src[XRANGE] = `^${src[GTLT]}\\s*${src[XRANGEPLAIN]}\$`
-const XRANGELOOSE = R++
-src[XRANGELOOSE] = `^${src[GTLT]}\\s*${src[XRANGEPLAINLOOSE]}\$`
+src.XRANGE = `^${src.GTLT}\\s*${src.XRANGEPLAIN}\$`
+src.XRANGELOOSE = `^${src.GTLT}\\s*${src.XRANGEPLAINLOOSE}\$`
 
 // Coercion.
 // Extract anything that could conceivably be a part of a valid semver
-const COERCE = R++
-src[COERCE] = `(?:^|[^\\d])(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\$|[^\\d])`
+src.COERCE = `(?:^|[^\\d])(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\$|[^\\d])`
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"
-const LONETILDE = R++
-src[LONETILDE] = '(?:~>?)'
+src.LONETILDE = '(?:~>?)'
 
-const TILDETRIM = R++
-src[TILDETRIM] = `(\\s*)${src[LONETILDE]}\\s+`
-re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g')
+src.TILDETRIM = `(\\s*)${src.LONETILDE}\\s+`
+re.TILDETRIM = new RegExp(src.TILDETRIM, 'g')
 const tildeTrimReplace = '$1~'
 
-const TILDE = R++
-src[TILDE] = `^${src[LONETILDE]}${src[XRANGEPLAIN]}\$`
-const TILDELOOSE = R++
-src[TILDELOOSE] = `^${src[LONETILDE]}${src[XRANGEPLAINLOOSE]}\$`
+src.TILDE = `^${src.LONETILDE}${src.XRANGEPLAIN}\$`
+src.TILDELOOSE = `^${src.LONETILDE}${src.XRANGEPLAINLOOSE}\$`
 
 // Caret ranges.
 // Meaning is "at least and backwards compatible with"
-const LONECARET = R++
-src[LONECARET] = '(?:\\^)'
+src.LONECARET = '(?:\\^)'
 
-const CARETTRIM = R++
-src[CARETTRIM] = `(\\s*)${src[LONECARET]}\\s+`
-re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g')
+src.CARETTRIM = `(\\s*)${src.LONECARET}\\s+`
+re.CARETTRIM = new RegExp(src.CARETTRIM, 'g')
 const caretTrimReplace = '$1^'
 
-const CARET = R++
-src[CARET] = `^${src[LONECARET]}${src[XRANGEPLAIN]}\$`
-const CARETLOOSE = R++
-src[CARETLOOSE] = `^${src[LONECARET]}${src[XRANGEPLAINLOOSE]}\$`
+src.CARET = `^${src.LONECARET}${src.XRANGEPLAIN}\$`
+src.CARETLOOSE = `^${src.LONECARET}${src.XRANGEPLAINLOOSE}\$`
 
 // A simple gt/lt/eq thing, or just "" to indicate "any version"
-const COMPARATORLOOSE = R++
-src[COMPARATORLOOSE] = `^${src[GTLT]}\\s*(${LOOSEPLAIN})\$|^\$`
-const COMPARATOR = R++
-src[COMPARATOR] = `^${src[GTLT]}\\s*(${FULLPLAIN})\$|^\$`
+src.COMPARATORLOOSE = `^${src.GTLT}\\s*(${LOOSEPLAIN})\$|^\$`
+src.COMPARATOR = `^${src.GTLT}\\s*(${FULLPLAIN})\$|^\$`
 
 // An expression to strip any whitespace between the gtlt and the thing
 // it modifies, so that `> 1.2.3` ==> `>1.2.3`
-const COMPARATORTRIM = R++
-src[COMPARATORTRIM] = `(\\s*)${src[GTLT]}\\s*(${LOOSEPLAIN}|${src[XRANGEPLAIN]})`
+src.COMPARATORTRIM = `(\\s*)${src.GTLT}\\s*(${LOOSEPLAIN}|${src.XRANGEPLAIN})`
 
 // this one has to use the /g flag
-re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g')
+re.COMPARATORTRIM = new RegExp(src.COMPARATORTRIM, 'g')
 const comparatorTrimReplace = '$1$2$3'
 
 // Something like `1.2.3 - 1.2.4`
 // Note that these all use the loose form, because they'll be
 // checked against either the strict or loose comparator form
 // later.
-const HYPHENRANGE = R++
-src[HYPHENRANGE] = `^\\s*(${src[XRANGEPLAIN]})\\s+-\\s+(${src[XRANGEPLAIN]})\\s*\$`
-
-const HYPHENRANGELOOSE = R++
-src[HYPHENRANGELOOSE] = `^\\s*(${src[XRANGEPLAINLOOSE]})\\s+-\\s+(${src[XRANGEPLAINLOOSE]})\\s*\$`
+src.HYPHENRANGE = `^\\s*(${src.XRANGEPLAIN})\\s+-\\s+(${src.XRANGEPLAIN})\\s*\$`
+src.HYPHENRANGELOOSE = `^\\s*(${src.XRANGEPLAINLOOSE})\\s+-\\s+(${src.XRANGEPLAINLOOSE})\\s*\$`
 
 // Star ranges basically just allow anything at all.
-const STAR = R++
-src[STAR] = '(<|>)?=?\\s*\\*'
+src.STAR = '(<|>)?=?\\s*\\*'
 
 // Compile to actual regexp objects.
 // All are flag-free, unless they were created above with a flag.
-for (let i = 0; i < R; i++) {
-  debug(i, src[i])
+;(Object.keys(src) as R[]).forEach((i, j) => {
+  debug(j, i, src[i])
   if (!re[i]) {
     re[i] = new RegExp(src[i])
   }
-}
+})
 
 export interface Options {
   loose?: boolean
@@ -252,7 +238,7 @@ export function parse(
     return null
   }
 
-  const r = options.loose ? re[LOOSE] : re[FULL]
+  const r = options.loose ? re.LOOSE : re.FULL
   if (!r.test(version)) {
     return null
   }
@@ -325,7 +311,7 @@ export class SemVer {
     this.options = options
     this.loose = !!options.loose
 
-    const m = version.trim().match(options.loose ? re[LOOSE] : re[FULL])
+    const m = version.trim().match(options.loose ? re.LOOSE : re.FULL)
     if (!m) {
       throw new TypeError('Invalid Version: ' + version)
     }
@@ -909,7 +895,7 @@ export class Comparator {
   }
 
   parse(comp: string): void {
-    const r = this.options.loose ? re[COMPARATORLOOSE] : re[COMPARATOR]
+    const r = this.options.loose ? re.COMPARATORLOOSE : re.COMPARATOR
     const m = comp.match(r)
     if (!m) {
       throw new TypeError('Invalid comparator: ' + comp)
@@ -1067,18 +1053,18 @@ export class Range {
     const loose = this.options.loose
     range = range.trim()
     // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-    const hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE]
+    const hr = loose ? re.HYPHENRANGELOOSE : re.HYPHENRANGE
     range = range.replace(hr, hyphenReplace)
     debug('hyphen replace', range)
     // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
-    range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace)
-    debug('comparator trim', range, re[COMPARATORTRIM])
+    range = range.replace(re.COMPARATORTRIM, comparatorTrimReplace)
+    debug('comparator trim', range, re.COMPARATORTRIM)
 
     // `~ 1.2.3` => `~1.2.3`
-    range = range.replace(re[TILDETRIM], tildeTrimReplace)
+    range = range.replace(re.TILDETRIM, tildeTrimReplace)
 
     // `^ 1.2.3` => `^1.2.3`
-    range = range.replace(re[CARETTRIM], caretTrimReplace)
+    range = range.replace(re.CARETTRIM, caretTrimReplace)
 
     // normalize spaces
     range = range.split(/\s+/).join(' ')
@@ -1086,7 +1072,7 @@ export class Range {
     // At this point, the range is completely trimmed and
     // ready to be split into comparators.
 
-    const compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR]
+    const compRe = loose ? re.COMPARATORLOOSE : re.COMPARATOR
     let set = range
       .split(' ')
       .map((comp) => parseComparator(comp, this.options))
@@ -1191,7 +1177,7 @@ function replaceTildes(comp: string, options: Options): string {
 }
 
 function replaceTilde(comp: string, options: Options): string {
-  const r = options.loose ? re[TILDELOOSE] : re[TILDE]
+  const r = options.loose ? re.TILDELOOSE : re.TILDE
   return comp.replace(r, (_, M, m, p, pr) => {
     debug('tilde', comp, _, M, m, p, pr)
     let ret: string
@@ -1234,7 +1220,7 @@ function replaceCarets(comp: string, options: Options): string {
 
 function replaceCaret(comp: string, options: Options): string {
   debug('caret', comp, options)
-  const r = options.loose ? re[CARETLOOSE] : re[CARET]
+  const r = options.loose ? re.CARETLOOSE : re.CARET
   return comp.replace(r, (_, M, m, p, pr) => {
     debug('caret', comp, _, M, m, p, pr)
     let ret: string
@@ -1288,7 +1274,7 @@ function replaceXRanges(comp: string, options: Options): string {
 
 function replaceXRange(comp: string, options: Options): string {
   comp = comp.trim()
-  const r = options.loose ? re[XRANGELOOSE] : re[XRANGE]
+  const r = options.loose ? re.XRANGELOOSE : re.XRANGE
   return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
     debug('xRange', comp, ret, gtlt, M, m, p, pr)
     const xM = isX(M)
@@ -1360,11 +1346,11 @@ function replaceXRange(comp: string, options: Options): string {
 function replaceStars(comp: string, options?: boolean | Options): string {
   debug('replaceStars', comp, options)
   // Looseness is ignored here.  star is always as loose as it gets!
-  return comp.trim().replace(re[STAR], '')
+  return comp.trim().replace(re.STAR, '')
 }
 
 /**
- * This function is passed to string.replace(re[HYPHENRANGE])
+ * This function is passed to string.replace(re.HYPHENRANGE)
  * M, m, patch, prerelease, build
  * 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
  * 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
@@ -1730,7 +1716,7 @@ export function coerce(version: string | SemVer | null | undefined): SemVer | nu
     return null
   }
 
-  const match = version.match(re[COERCE])
+  const match = version.match(re.COERCE)
   if (!match) {
     return null
   }
