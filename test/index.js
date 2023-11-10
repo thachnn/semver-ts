@@ -342,7 +342,7 @@ test('negative range tests', function (t) {
   ].forEach(function (v) {
     var range = v[0]
     var ver = v[1]
-    var loose = v[2]
+    var loose = /** @type {(?boolean | semver.Options)} */ v[2]
     var found = satisfies(ver, range, loose)
     t.notOk(found, ver + ' not satisfied by ' + range)
   })
@@ -606,7 +606,7 @@ test('valid range test', function (t) {
   ].forEach(function (v) {
     var pre = v[0]
     var wanted = v[1]
-    var loose = v[2]
+    var loose = /** @type {?boolean} */ v[2]
     var found = validRange(pre, loose)
 
     t.equal(found, wanted, 'validRange(' + pre + ') === ' + wanted)
@@ -691,9 +691,9 @@ test('comparators test', function (t) {
     ['>*', [['<0.0.0']]],
     ['<*', [['<0.0.0']]]
   ].forEach(function (v) {
-    var pre = v[0]
+    /** @type {string} */ var pre = v[0]
     var wanted = v[1]
-    var found = toComparators(v[0])
+    var found = toComparators(pre)
     var jw = JSON.stringify(wanted)
     t.deepEqual(found, wanted, 'toComparators(' + pre + ') === ' + jw)
   })
@@ -711,7 +711,7 @@ test('invalid version numbers', function (t) {
     'Infinity.NaN.Infinity'
   ].forEach(function (v) {
     t.throws(function () {
-      new SemVer(v) // eslint-disable-line no-new
+      new SemVer(/** @type {?string} */ v) // eslint-disable-line no-new
     }, new RegExp('^TypeError: Invalid Version: ' + v))
   })
 
@@ -740,7 +740,7 @@ test('strict vs loose version numbers', function (t) {
     t.throws(function () {
       new SemVer(strict).compare(loose)
     })
-    t.equal(semver.compareLoose(v[0], v[1]), 0)
+    t.equal(semver.compareLoose(loose, strict), 0)
   })
   t.end()
 })
@@ -891,8 +891,10 @@ test('intersect comparators', function (t) {
     ['<=2.0.0', '>1.0.0', true],
     ['<=1.0.0', '>=2.0.0', false]
   ].forEach(function (v) {
-    var comparator1 = new Comparator(v[0])
-    var comparator2 = new Comparator(v[1])
+    /** @type {string} */ var r1 = v[0]
+    /** @type {string} */ var r2 = v[1]
+    var comparator1 = new Comparator(r1)
+    var comparator2 = new Comparator(r2)
     var expect = v[2]
 
     var actual1 = comparator1.intersects(comparator2, false)
@@ -901,10 +903,10 @@ test('intersect comparators', function (t) {
     var actual4 = intersects(comparator2, comparator1)
     var actual5 = intersects(comparator1, comparator2, true)
     var actual6 = intersects(comparator2, comparator1, true)
-    var actual7 = intersects(v[0], v[1])
-    var actual8 = intersects(v[1], v[0])
-    var actual9 = intersects(v[0], v[1], true)
-    var actual10 = intersects(v[1], v[0], true)
+    var actual7 = intersects(r1, r2)
+    var actual8 = intersects(r2, r1)
+    var actual9 = intersects(r1, r2, true)
+    var actual10 = intersects(r2, r1, true)
     t.equal(actual1, expect)
     t.equal(actual2, expect)
     t.equal(actual3, expect)
@@ -940,15 +942,18 @@ test('ranges intersect', function (t) {
     ['<1.0.0 >=2.0.0', '2.1.0', false],
     ['<1.0.0 >=2.0.0', '>1.4.0 <1.6.0 || 2.0.0', false]
   ].forEach(function (v) {
-    var range1 = new Range(v[0])
-    var range2 = new Range(v[1])
+    /** @type {string} */ var r1 = v[0]
+    /** @type {string} */ var r2 = v[1]
+    var range1 = new Range(r1)
+    var range2 = new Range(r2)
     var expect = v[2]
+
     var actual1 = range1.intersects(range2)
     var actual2 = range2.intersects(range1)
-    var actual3 = intersects(v[1], v[0])
-    var actual4 = intersects(v[0], v[1])
-    var actual5 = intersects(v[1], v[0], true)
-    var actual6 = intersects(v[0], v[1], true)
+    var actual3 = intersects(r2, r1)
+    var actual4 = intersects(r1, r2)
+    var actual5 = intersects(r2, r1, true)
+    var actual6 = intersects(r1, r2, true)
     var actual7 = intersects(range1, range2)
     var actual8 = intersects(range2, range1)
     var actual9 = intersects(range1, range2, true)

@@ -73,7 +73,7 @@ test('\nltr tests', function (t) {
   ].forEach(function (tuple) {
     var range = tuple[0]
     var version = tuple[1]
-    var loose = tuple[2] || false
+    /** @type {?boolean} */ var loose = tuple[2] || false
     var msg = `ltr(${version}, ${range}, ${loose})`
     t.ok(ltr(version, range, loose), msg)
   })
@@ -171,7 +171,7 @@ test('\nnegative ltr tests', function (t) {
   ].forEach(function (tuple) {
     var range = tuple[0]
     var version = tuple[1]
-    var loose = tuple[2] || false
+    /** @type {?boolean} */ var loose = tuple[2] || false
     var msg = `!ltr(${version}, ${range}, ${loose})`
     t.notOk(ltr(version, range, loose), msg)
   })

@@ -1,5 +1,6 @@
 var test = require('tape')
-var minVersion = require('../').minVersion
+var semver = require('../')
+var minVersion = semver.minVersion
 
 test('\nminimum version in range tests', function (t) {
   // [range, minimum, loose]
@@ -66,9 +67,9 @@ test('\nminimum version in range tests', function (t) {
   ].forEach(function (tuple) {
     var range = tuple[0]
     var version = tuple[1]
-    var loose = tuple[2] || false
+    /** @type {?boolean} */ var loose = tuple[2] || false
     var msg = `minVersion(${range}, ${loose}) = ${version}`
-    var min = minVersion(range, loose)
+    var min = /** @type {(semver.SemVer | ?string)} */ minVersion(range, loose)
     t.ok(min === version || (min && min.version === version), msg)
   })
   t.end()

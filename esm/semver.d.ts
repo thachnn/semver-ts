@@ -344,6 +344,7 @@ export declare class Range {
   format(): string
   toString(): string
 
+  /** @param {string} range */
   parseRange(range: string): ReadonlyArray<Comparator>
   intersects(range: Range, options?: boolean | Options): boolean
 
@@ -411,7 +412,7 @@ export declare function validRange(
  */
 export declare function ltr(
   version: string | SemVer,
-  range: string | Range,
+  range: string | Range | Comparator,
   options?: boolean | Options
 ): boolean
 
@@ -420,7 +421,7 @@ export declare function ltr(
  */
 export declare function gtr(
   version: string | SemVer,
-  range: string | Range,
+  range: string | Range | Comparator,
   options?: boolean | Options
 ): boolean
 
@@ -431,7 +432,7 @@ export declare function gtr(
  */
 export declare function outside(
   version: string | SemVer,
-  range: string | Range,
+  range: string | Range | Comparator,
   hilo: '>' | '<',
   options?: boolean | Options
 ): boolean
@@ -448,8 +449,8 @@ export declare function prerelease(
  * Return true if any of the ranges comparators intersect.
  */
 export declare function intersects(
-  r1: string | Range,
-  r2: string | Range,
+  r1: string | Range | Comparator,
+  r2: string | Range | Comparator,
   options?: boolean | Options
 ): boolean
 

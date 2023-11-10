@@ -17,7 +17,7 @@ test('\nmajor tests', function (t) {
   ].forEach(function (tuple) {
     var range = tuple[0]
     var version = tuple[1]
-    var loose = tuple[2] || false
+    /** @type {?boolean} */ var loose = tuple[2] || false
     var msg = `major(${range}) = ${version}`
     t.equal(semver.major(range, loose), version, msg)
   })
@@ -40,7 +40,7 @@ test('\nminor tests', function (t) {
   ].forEach(function (tuple) {
     var range = tuple[0]
     var version = tuple[1]
-    var loose = tuple[2] || false
+    /** @type {?boolean} */ var loose = tuple[2] || false
     var msg = `minor(${range}) = ${version}`
     t.equal(semver.minor(range, loose), version, msg)
   })
@@ -63,7 +63,7 @@ test('\npatch tests', function (t) {
   ].forEach(function (tuple) {
     var range = tuple[0]
     var version = tuple[1]
-    var loose = tuple[2] || false
+    /** @type {?boolean} */ var loose = tuple[2] || false
     var msg = `patch(${range}) = ${version}`
     t.equal(semver.patch(range, loose), version, msg)
   })

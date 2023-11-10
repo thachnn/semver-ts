@@ -437,7 +437,7 @@ export class SemVer {
       } else if (a === undefined) {
         return -1
       } else if (a === b) {
-        continue
+        // continue
       } else {
         return compareIdentifiers(a, b)
       }
@@ -1049,6 +1049,7 @@ export class Range {
     return this.range
   }
 
+  /** @param {string} range */
   parseRange(range: string): ReadonlyArray<Comparator> {
     const loose = this.options.loose
     range = range.trim()
@@ -1359,7 +1360,7 @@ function replaceStars(comp: string, options?: boolean | Options): string {
 function hyphenReplace(
   $0: string,
   from: any, fM: any, fm: any, fp: any, fpr: any, fb: any,
-  to: any, tM: any, tm: any, tp: any, tpr: any, tb: any
+  to: any, tM: any, tm: any, tp: any, tpr: any, _tb: any
 ): string {
   if (isX(fM)) {
     from = ''
@@ -1585,7 +1586,7 @@ export function validRange(
  */
 export function ltr(
   version: string | SemVer,
-  range: string | Range,
+  range: string | Range | Comparator,
   options?: boolean | Options
 ): boolean {
   return outside(version, range, '<', options)
@@ -1596,7 +1597,7 @@ export function ltr(
  */
 export function gtr(
   version: string | SemVer,
-  range: string | Range,
+  range: string | Range | Comparator,
   options?: boolean | Options
 ): boolean {
   return outside(version, range, '>', options)
@@ -1609,7 +1610,7 @@ export function gtr(
  */
 export function outside(
   version: string | SemVer,
-  range: string | Range,
+  range: string | Range | Comparator,
   hilo: '>' | '<',
   options?: boolean | Options
 ): boolean {
@@ -1647,8 +1648,8 @@ export function outside(
   for (let i = 0; i < range.set.length; ++i) {
     const comparators = range.set[i]
 
-    let high = null as unknown as Comparator
-    let low = null as unknown as Comparator
+    /** @type {Comparator} */ let high = null as unknown as Comparator
+    /** @type {Comparator} */ let low = null as unknown as Comparator
 
     for (let comparator of comparators) {
       if (comparator.semver === ANY) {
@@ -1695,8 +1696,8 @@ export function prerelease(
  * Return true if any of the ranges comparators intersect.
  */
 export function intersects(
-  r1: string | Range,
-  r2: string | Range,
+  r1: string | Range | Comparator,
+  r2: string | Range | Comparator,
   options?: boolean | Options
 ): boolean {
   r1 = new Range(r1, options)

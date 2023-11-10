@@ -68,7 +68,7 @@ test('\ngtr tests', function (t) {
   ].forEach(function (tuple) {
     var range = tuple[0]
     var version = tuple[1]
-    var loose = tuple[2] || false
+    /** @type {?boolean} */ var loose = tuple[2] || false
     var msg = `gtr(${version}, ${range}, ${loose})`
     t.ok(gtr(version, range, loose), msg)
   })
@@ -163,7 +163,7 @@ test('\nnegative gtr tests', function (t) {
   ].forEach(function (tuple) {
     var range = tuple[0]
     var version = tuple[1]
-    var loose = tuple[2] || false
+    /** @type {?boolean} */ var loose = tuple[2] || false
     var msg = `!gtr(${version}, ${range}, ${loose})`
     t.notOk(gtr(version, range, loose), msg)
   })

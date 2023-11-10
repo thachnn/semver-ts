@@ -28,7 +28,7 @@ test('\ncoerce tests', function (t) {
     '1'.r(16) + '.' + '2'.r(16) + '.' + '9'.r(16)
   ].forEach(function (input) {
     var msg = `coerce(${input}) should be null`
-    t.equal(coerce(input), null, msg)
+    t.equal(coerce(/** @type {?string} */ input), null, msg)
   })
 
   // Expected to be the valid.
