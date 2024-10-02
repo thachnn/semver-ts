@@ -9,10 +9,10 @@
     "test": "node node_modules/tape/bin/tape test/**/*.js"
   },
   "devDependencies": {
-    "@types/node": "^4.9.0",
-    "@types/tape": "^4.13.0",
-    "tape": "^4.10.0",
-    "typescript": "^3.4.0"
+    "@types/node": "^4.9.3",
+    "@types/tape": "^4.13.2",
+    "tape": "thachnn/bundled#tape-4.16.2",
+    "typescript": "^3.4.1"
   },
   "license": "ISC",
   "repository": "thachnn/semver-ts",
@@ -22,7 +22,6 @@
   "files": [
     "lib/",
     "esm/",
-    "src/",
     "*.bnf"
   ],
   "types": "esm/semver.d.ts",
